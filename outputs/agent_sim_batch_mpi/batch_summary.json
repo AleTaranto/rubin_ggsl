@@ -1,0 +1,14 @@
+{
+  "timestamp": "2026-06-04 10:45:53",
+  "mpi_processes": 1,
+  "total_simulations": 2,
+  "successful": 2,
+  "failed": 0,
+  "errors": 0,
+  "total_computation_time_seconds": 44.19711256027222,
+  "average_per_simulation_seconds": 22.09855628013611,
+  "clusters": [
+    "MACS J0416"
+  ],
+  "realizations_per_cluster": 2
+}

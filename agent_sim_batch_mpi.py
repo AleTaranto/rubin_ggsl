@@ -25,6 +25,8 @@ from pathlib import Path
 from typing import List, Dict, Any, Tuple
 import json
 import logging
+from datetime import datetime
+from astropy.io import fits
 
 try:
     from mpi4py import MPI
@@ -64,6 +66,56 @@ def distribute_work(
         for real_id in range(realizations_per_cluster)
     ]
     return [work[i] for i in range(len(work)) if i % size == rank]
+
+
+def save_fits_with_metadata(image: np.ndarray, output_path: Path, cluster_name: str,
+                             image_type: str, realization_id: int = None,
+                             script_name: str = "agent_sim_batch_mpi.py") -> None:
+    """Save image as FITS file with metadata header.
+    
+    Parameters
+    ----------
+    image : np.ndarray
+        2D image array to save
+    output_path : Path
+        Output file path (will use .fits extension)
+    cluster_name : str
+        Name of the cluster simulated
+    image_type : str
+        Type of image: 'perfect', 'hst', or 'rubin'
+    realization_id : int, optional
+        Realization ID for batch simulations
+    script_name : str
+        Name of the script that generated this image
+    """
+    # Convert path to .fits extension
+    output_path = output_path.with_suffix('.fits')
+    
+    # Create primary HDU
+    hdu = fits.PrimaryHDU(data=image.astype(np.float32))
+    
+    # Add metadata to header
+    hdu.header['DATE'] = (datetime.utcnow().isoformat(), 'UTC creation date')
+    hdu.header['CLUSTER'] = (cluster_name, 'Lensing cluster name')
+    hdu.header['IMGTYPE'] = (image_type, 'Image type: perfect/hst/rubin')
+    hdu.header['SCRIPT'] = (script_name, 'Script used to generate this image')
+    hdu.header['ORIGIN'] = ('AGENT_sim MPI', 'Origin of data')
+    if realization_id is not None:
+        hdu.header['REALID'] = (realization_id, 'Realization ID for batch run')
+    
+    # Add image description
+    if image_type == 'perfect':
+        hdu.header['DESCRIP'] = 'Perfect noiseless image without PSF convolution'
+    elif image_type == 'hst':
+        hdu.header['DESCRIP'] = 'HST-like image with PSF=0.08 arcsec'
+        hdu.header['PSF'] = (0.08, 'PSF sigma in arcsec')
+    elif image_type == 'rubin':
+        hdu.header['DESCRIP'] = 'Rubin/LSST-like image with PSF=0.70 arcsec'
+        hdu.header['PSF'] = (0.70, 'PSF sigma in arcsec')
+    
+    # Create HDU list and write
+    hdul = fits.HDUList([hdu])
+    hdul.writeto(output_path, overwrite=True)
 
 
 def run_realization(
@@ -120,18 +172,30 @@ def run_realization(
         elapsed = time.time() - start_time
         
         if results:
-            # Save arrays
-            np.save(
-                realization_dir / "perfect_image.npy",
-                results['perfect_image']
+            # Save images as FITS with metadata
+            save_fits_with_metadata(
+                results['perfect_image'],
+                realization_dir / "perfect_image.fits",
+                cluster_name,
+                "perfect",
+                realization_id,
+                "agent_sim_batch_mpi.py"
             )
-            np.save(
-                realization_dir / "hst_image.npy",
-                results['hst_image']
+            save_fits_with_metadata(
+                results['hst_image'],
+                realization_dir / "hst_image.fits",
+                cluster_name,
+                "hst",
+                realization_id,
+                "agent_sim_batch_mpi.py"
             )
-            np.save(
-                realization_dir / "rubin_image.npy",
-                results['rubin_image']
+            save_fits_with_metadata(
+                results['rubin_image'],
+                realization_dir / "rubin_image.fits",
+                cluster_name,
+                "rubin",
+                realization_id,
+                "agent_sim_batch_mpi.py"
             )
             
             # Save comparison metadata
