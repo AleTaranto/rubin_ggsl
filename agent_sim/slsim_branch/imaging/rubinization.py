@@ -97,7 +97,7 @@ class SlsimRubinizer:
         
         # Create and apply PSF
         psf = self._create_psf(pixel_scale)
-        image_e = convolve(image_e, psf, mode='same')
+        image_e = convolve(image_e, psf, mode='constant', cval=0.0)
         
         # Add noise
         sky_flux = 10**(-self.sky_mag / 2.5) * 100

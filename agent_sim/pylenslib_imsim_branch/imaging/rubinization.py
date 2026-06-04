@@ -115,7 +115,7 @@ class ImSimRubinizer:
             PSF-convolved image
         """
         # Use scipy convolve for accurate convolution
-        convolved = convolve(image, psf_kernel, mode='same')
+        convolved = convolve(image, psf_kernel, mode='constant', cval=0.0)
         return convolved
     
     def add_noise(self, image, sky_flux):

@@ -1,0 +1,9 @@
+{
+  "cluster": "MACS J0416",
+  "realization_id": 1,
+  "seed": 1,
+  "elapsed_seconds": 22.230622053146362,
+  "hst_snr": 4.197392791465757,
+  "rubin_snr": 11.47532534830003,
+  "psf_ratio": 8.75
+}

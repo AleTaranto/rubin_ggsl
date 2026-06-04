@@ -156,17 +156,53 @@ class NFW(DarkMatterModel):
         return self.rho_s / (x * (1 + x)**2)
     
     def surface_density(self, R):
-        """NFW surface density (integrated from 0 to infinity)."""
-        x = R / self.rs
+        """NFW surface density using analytical formula.
         
-        def integrand(z):
-            return self.rho_s / np.sqrt(z**2 - x**2) / (z * (1 + z)**2)
+        Analytical solution for surface density:
+        Σ(R) = 2 * ρ_s * r_s * f(x) where x = R/r_s
         
+        For x > 0:
+        - x < 1: f(x) = (1/(x^2 - 1)) * [1 - 2/sqrt(1-x^2) * arctanh(sqrt(1-x^2))]
+        - x = 1: f(x) = 1/3 (limiting value)
+        - x > 1: f(x) = (1/(x^2 - 1)) * [1 - 2/sqrt(x^2-1) * arctan(sqrt(x^2-1))]
+        """
+        x_val = np.atleast_1d(R / self.rs)
+        result = np.zeros_like(x_val, dtype=float)
+        
+        # Small epsilon to avoid singularities
+        eps = 1e-10
+        
+        # Case 1: x ≈ 0 (near center) - limit gives 1/3
+        mask_zero = x_val < eps
+        if np.any(mask_zero):
+            result[mask_zero] = 1.0 / 3.0
+        
+        # Case 2: Small x < 1 but not too close to 0
+        mask_small = (x_val >= eps) & (x_val < 1.0 - eps)
+        if np.any(mask_small):
+            x2 = x_val[mask_small]
+            sqrt_term = np.sqrt(1.0 - x2**2)
+            result[mask_small] = (1.0 / (x2**2 - 1.0)) * (1.0 - 2.0 / sqrt_term * np.arctanh(sqrt_term))
+        
+        # Case 3: Near x = 1
+        mask_one = (x_val >= 1.0 - eps) & (x_val <= 1.0 + eps)
+        if np.any(mask_one):
+            result[mask_one] = 1.0 / 3.0
+        
+        # Case 4: x > 1 + eps
+        mask_large = x_val > 1.0 + eps
+        if np.any(mask_large):
+            x3 = x_val[mask_large]
+            sqrt_term = np.sqrt(x3**2 - 1.0)
+            result[mask_large] = (1.0 / (x3**2 - 1.0)) * (1.0 - 2.0 / sqrt_term * np.arctan(sqrt_term))
+        
+        surf_dens = 2.0 * self.rho_s * self.rs * result
+        
+        # Return scalar if input was scalar
         if np.isscalar(R):
-            result, _ = quad(integrand, x + 1e-6, 1e3 * x + 10, limit=100)
-            return 2 * result
+            return float(surf_dens[0])
         else:
-            return np.array([self.surface_density(R_i) for R_i in np.atleast_1d(R)])
+            return surf_dens
     
     def mass_enclosed(self, r):
         """NFW enclosed mass."""
