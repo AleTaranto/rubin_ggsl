@@ -1,0 +1,33 @@
+Metadata-Version: 2.4
+Name: agent-sim
+Version: 0.1.0
+Summary: AGENT Simulation: Strong Gravitational Lensing simulations for dark matter studies
+Author: AGENT Team
+License: MIT
+Project-URL: Homepage, https://github.com/your-org/agent-sim
+Project-URL: Documentation, https://agent-sim.readthedocs.io
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy>=1.21
+Requires-Dist: scipy>=1.7
+Requires-Dist: astropy>=5.0
+Requires-Dist: matplotlib>=3.5
+Requires-Dist: pyyaml>=6.0
+Provides-Extra: pylenslib
+Requires-Dist: pylenslib>=0.1; extra == "pylenslib"
+Provides-Extra: imsim
+Requires-Dist: imsim>=0.1; extra == "imsim"
+Provides-Extra: slsim
+Requires-Dist: slsim>=0.1; extra == "slsim"
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0; extra == "dev"
+Requires-Dist: pytest-cov>=3.0; extra == "dev"
+Requires-Dist: black>=22.0; extra == "dev"
+Requires-Dist: flake8>=4.0; extra == "dev"
+Requires-Dist: sphinx>=5.0; extra == "dev"
+Dynamic: license-file
+Dynamic: requires-python
+
+# rubin_ggsl
+simulation code to produce expected rubin ggsl events in different dark matter conditions

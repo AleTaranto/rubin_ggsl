@@ -46,9 +46,9 @@ def get_default_clusters() -> List[str]:
         "MACS J0416",
         "MACS J0717",
         "Abell 2744",
-        "RXJ 1347",
+        "Abell S1063",
         "Abell 370",
-        "Abell 1689",
+        "MACS J1149",
     ]
 
 

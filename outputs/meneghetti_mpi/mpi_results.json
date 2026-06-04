@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-06-04 10:40:29",
+  "mpi_processes": 1,
+  "total_clusters": 6,
+  "successful": 6,
+  "failed": 0,
+  "errors": 0,
+  "results": [
+    {
+      "cluster_name": "MACS J0416",
+      "status": "success",
+      "elapsed_seconds": 21.376465559005737,
+      "output_dir": "outputs/meneghetti_mpi/MACS_J0416"
+    },
+    {
+      "cluster_name": "MACS J0717",
+      "status": "success",
+      "elapsed_seconds": 12.136647701263428,
+      "output_dir": "outputs/meneghetti_mpi/MACS_J0717"
+    },
+    {
+      "cluster_name": "Abell 2744",
+      "status": "success",
+      "elapsed_seconds": 9.871853590011597,
+      "output_dir": "outputs/meneghetti_mpi/Abell_2744"
+    },
+    {
+      "cluster_name": "Abell S1063",
+      "status": "success",
+      "elapsed_seconds": 15.695487260818481,
+      "output_dir": "outputs/meneghetti_mpi/Abell_S1063"
+    },
+    {
+      "cluster_name": "Abell 370",
+      "status": "success",
+      "elapsed_seconds": 11.962797403335571,
+      "output_dir": "outputs/meneghetti_mpi/Abell_370"
+    },
+    {
+      "cluster_name": "MACS J1149",
+      "status": "success",
+      "elapsed_seconds": 8.11101508140564,
+      "output_dir": "outputs/meneghetti_mpi/MACS_J1149"
+    }
+  ]
+}
