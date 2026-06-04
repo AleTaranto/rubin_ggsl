@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-sim"
+version = "0.1.0"
+description = "AGENT Simulation: Strong Gravitational Lensing simulations for dark matter studies"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "AGENT Team"}
+]
+
+dependencies = [
+    "numpy>=1.21",
+    "scipy>=1.7",
+    "astropy>=5.0",
+    "matplotlib>=3.5",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+pylenslib = ["pylenslib>=0.1"]
+imsim = ["imsim>=0.1"]
+slsim = ["slsim>=0.1"]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=3.0",
+    "black>=22.0",
+    "flake8>=4.0",
+    "sphinx>=5.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/your-org/agent-sim"
+Documentation = "https://agent-sim.readthedocs.io"
+
+[tool.setuptools]
+packages = ["agent_sim", "agent_sim.core", "agent_sim.core.models", "agent_sim.core.lensing", "agent_sim.core.observables", "agent_sim.core.utils", "agent_sim.pylenslib_imsim_branch", "agent_sim.slsim_branch", "agent_sim.comparison"]

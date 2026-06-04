@@ -1,0 +1,19 @@
+# Core dependencies
+numpy>=1.21
+scipy>=1.7
+astropy>=5.0
+matplotlib>=3.5
+pyyaml>=6.0
+
+# Optional: For Branch 1 (PyLensLib + ImSim)
+# pylenslib>=0.1
+# imsim>=0.1
+
+# Optional: For Branch 2 (SLSim)
+# slsim>=0.1
+
+# Development
+pytest>=7.0
+pytest-cov>=3.0
+black>=22.0
+flake8>=4.0
