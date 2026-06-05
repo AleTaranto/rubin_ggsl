@@ -1,0 +1,46 @@
+{
+  "events": [],
+  "summary": {
+    "cluster_cfg": {
+      "name": "TunedHighKappa",
+      "M200": "1e15",
+      "c": 6.0,
+      "z": 0.3,
+      "n_subhalos": 100,
+      "subhalo_mass_range": [
+        "1e9",
+        "1e11"
+      ],
+      "pylenslib_models": {
+        "fov_half_arcsec": 5.0,
+        "main": {
+          "profile": "piemd",
+          "sigma0": 320.0,
+          "q": 0.85,
+          "pa": 0.4,
+          "theta_c": 0.001,
+          "theta_t": 6.0,
+          "x1": 0.0,
+          "x2": 0.0
+        },
+        "dm_subhalos": {
+          "profile": "nfwell",
+          "n": 100,
+          "mass_min": "1e9",
+          "mass_max": "1e11",
+          "shmf_slope": -0.9,
+          "conc_min": 10.0,
+          "conc_max": 25.0,
+          "r_min_arcsec": 0.2,
+          "r_max_arcsec": 4.5
+        }
+      }
+    },
+    "n_sources": 1,
+    "n_events": 0,
+    "mean_magnification": 0,
+    "median_magnification": 0,
+    "mean_arc_length": 0,
+    "median_arc_length": 0
+  }
+}

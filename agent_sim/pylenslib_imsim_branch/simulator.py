@@ -232,6 +232,15 @@ class PyLenslibSimulator:
         # Create meshgrid in angular coordinates (arcsec)
         X, Y = np.meshgrid(x_grid, y_grid)
 
+        # Ensure PyLensLib composite models initialize internal grids
+        # consistently by setting the grid size on the composite object.
+        try:
+            # compositeModel expects a 1D theta array (arcsec)
+            composite.setGrid(x_grid)
+        except Exception:
+            # ignore if composite doesn't support setGrid for some models
+            pass
+
         # Compute convergence kappa and shear (gamma1, gamma2)
         with np.errstate(all='ignore'):
             kappa_grid = composite.kappa(X, Y)

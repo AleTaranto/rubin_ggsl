@@ -1,0 +1,49 @@
+{
+  "results": [
+    {
+      "cluster": "MACSJ1206_reference",
+      "realization": 0,
+      "cluster_cfg": {
+        "name": "MACSJ1206_reference",
+        "M200": "1.2e15",
+        "c": 4.5,
+        "z": 0.439,
+        "n_subhalos": 50,
+        "subhalo_mass_range": [
+          "1e9",
+          "1e12"
+        ],
+        "pylenslib_models": {
+          "fov_half_arcsec": 100.0,
+          "main": {
+            "profile": "piemd",
+            "sigma0": 300.0,
+            "q": 0.9,
+            "pa": 0.0,
+            "theta_c": 0.001,
+            "theta_t": 50.0,
+            "x1": 0.0,
+            "x2": 0.0
+          },
+          "dm_subhalos": {
+            "profile": "nfwell",
+            "n": 50,
+            "mass_min": "1e9",
+            "mass_max": "1e12",
+            "shmf_slope": -0.9,
+            "conc_min": 8.0,
+            "conc_max": 30.0,
+            "r_min_arcsec": 0.5,
+            "r_max_arcsec": 80.0
+          }
+        }
+      },
+      "n_sources": 50,
+      "n_events": 0,
+      "mean_magnification": 0,
+      "median_magnification": 0,
+      "mean_arc_length": 0,
+      "median_arc_length": 0
+    }
+  ]
+}

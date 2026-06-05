@@ -1,0 +1,82 @@
+# Short profiling variant of MACSJ1206_reference.yaml
+output_dir: pylenslib_outputs_paper_MACSJ1206_profile
+n_realizations: 1
+n_pixels: 128
+grid_size: 0.02
+x_range: [-100, 100]
+y_range: [-100, 100]
+image_size: 256
+pixel_scale: 0.2
+
+clusters:
+  - name: MACSJ1206_profile_short
+    M200: 1.2e15
+    c: 4.5
+    z: 0.439
+    n_subhalos: 10
+    subhalo_mass_range: [1e9, 1e12]
+    pylenslib_models:
+      fov_half_arcsec: 100.0
+      main:
+        profile: piemd
+        sigma0: 300.0
+        q: 0.9
+        pa: 0.0
+        theta_c: 0.001
+        theta_t: 50.0
+        x1: 0.0
+        x2: 0.0
+      dm_subhalos:
+        profile: nfwell
+        n: 10
+        mass_min: 1e9
+        mass_max: 1e12
+        shmf_slope: -0.9
+        conc_min: 8.0
+        conc_max: 30.0
+        r_min_arcsec: 0.5
+        r_max_arcsec: 80.0
+
+sources:
+  n_sources: 10
+  region_size_arcmin: 2.0
+  redshift: 1.425
+  density_per_arcmin2: 1
+  explicit:
+    - x: 0.0
+      y: 0.0
+      magnitude: 22.0
+      radius_arcsec: 0.08
+      redshift: 1.425
+
+seed: 2020
+
+rendering:
+  backend: pylenslib_direct
+  npix_hires: 512
+  source_n: 2.0
+  source_q: 0.9
+  source_pa: 0.0
+  include_lens_light: true
+  lens_light_n: 4.0
+  lens_light_re: 1.2
+  zoom_arcsec: 100.0
+  psf_fwhm: 0.18
+  readnoise: 4.0
+  gain: 1.0
+  observation:
+    zp: 26.3
+    texp: 1200
+    mag_sky: 22.0
+
+detection:
+  threshold_rel: 0.12
+  min_pixels: 10
+  elongation: 3.0
+
+mpi:
+  split_mode: none
+
+notes: |
+  Reduced-resolution profiling config derived from MACSJ1206_reference.yaml
+  to exercise the main rendering and map computation paths quickly.

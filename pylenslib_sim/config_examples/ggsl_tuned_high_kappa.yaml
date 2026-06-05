@@ -1,0 +1,73 @@
+# Tuned configuration to increase central convergence (kappa) and
+# make subhalo perturbations more visible.
+# Comments explain how each entry affects the simulation.
+
+output_dir: pylenslib_outputs_ggsl_tuned
+n_realizations: 1                      # number of independent realizations
+n_pixels: 800                         # resolution used for lensing maps (higher -> finer kappa maps)
+grid_size: 0.02
+x_range: [-15, 15]                      # field-of-view in arcsec (x)
+y_range: [-15, 15]                      # field-of-view in arcsec (y)
+image_size: 200
+pixel_scale: 0.2                     # final image pixel scale in arcsec
+
+clusters:
+  - name: TunedHighKappa
+    M200: 1e15                         # total halo mass in Msun (increase => more kappa)
+    c: 6.0                             # concentration (higher => more mass near center)
+    z: 0.3                             # lens redshift (lower z_l reduces Sigma_crit, increasing kappa)
+    n_subhalos: 100                    # number of subhalos (more => more perturbations)
+    subhalo_mass_range: [1e9, 1e11]    # heavier subhalos produce stronger local effects
+    pylenslib_models:
+      fov_half_arcsec: 5.0
+      main:
+        profile: piemd
+        sigma0: 320.0                  # central velocity dispersion (km/s): increase to strengthen lens
+        q: 0.85
+        pa: 0.4
+        theta_c: 0.001
+        theta_t: 6.0
+        x1: 0.0
+        x2: 0.0
+      # Dark-matter subhalos (projected close to center)
+      dm_subhalos:
+        profile: nfwell
+        n: 100
+        mass_min: 1e9                  # minimum subhalo mass (Msun)
+        mass_max: 1e11                 # maximum subhalo mass (Msun)
+        shmf_slope: -0.9
+        conc_min: 10.0
+        conc_max: 25.0
+        r_min_arcsec: 0.2            # place subhalos very close in projection
+        r_max_arcsec: 4.5
+
+sources:
+  n_sources: 3
+  region_size_arcmin: 0.1             # small region -> sources concentrated near center
+  redshift: 2.0                       # higher source redshift increases lensing strength
+  density_per_arcmin2: 20
+  explicit:
+    - x: 0.0                          # place an explicit source at the center (maximizes ring formation)
+      y: 0.0
+      magnitude: 22.0                 # source apparent magnitude (affects counts/brightness)
+      radius_arcsec: 0.08             # compact source radius produces thinner, higher-contrast arcs
+
+seed: 2026
+
+rendering:
+  backend: pylenslib_direct
+  npix_hires: 1200                    # high-res internal grid for ray-tracing and rendering
+  source_n: 2.0
+  source_q: 0.9
+  source_pa: 0.5
+  include_lens_light: true            # include lens galaxy light (can hide faint arcs if too bright)
+  lens_light_n: 4.0
+  lens_light_re: 1.0
+  zoom_arcsec: 15.0                    # crop to central 6 arcsec to focus on inner region
+  psf_fwhm: 0.6                       # seeing/PSF FWHM in arcsec (moderate sharpness)
+  readnoise: 6.0                      # read noise in electrons (affects S/N)
+  gain: 1.5                           # e-/ADU gain (used for Poisson noise modeling)
+  observation:
+    zp: 27.0                          # photometric zeropoint (affects counts conversion)
+    texp: 30                          # exposure time (s)
+    mag_sky: 24.8                     # sky surface brightness (mag/arcsec^2)

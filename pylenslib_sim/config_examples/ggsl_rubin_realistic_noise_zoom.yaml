@@ -1,0 +1,55 @@
+output_dir: pylenslib_outputs_rubin_realistic_noise_zoom
+n_realizations: 1
+n_pixels: 400
+grid_size: 0.02
+x_range: [-10, 10]
+y_range: [-10, 10]
+image_size: 300
+pixel_scale: 0.2
+clusters:
+  - name: RubinRealisticGGSL_NoiseZoom
+    M200: 8e15
+    c: 4.0
+    z: 0.5
+    n_subhalos: 50
+    subhalo_mass_range: [1e8, 1e11]
+    pylenslib_models:
+      fov_half_arcsec: 10.0
+      main:
+        profile: piemd
+        sigma0: 250.0
+        q: 0.80
+        pa: 0.4
+        theta_c: 0.01
+        theta_t: 6.0
+        x1: 0.0
+        x2: 0.0
+sources:
+  n_sources: 1
+  region_size_arcmin: 0.5
+  redshift: 1.5
+  density_per_arcmin2: 80
+  explicit:
+    - x: 0.10
+      y: 0.00
+      magnitude: 22.5
+      radius_arcsec: 0.08
+seed: 1234
+rendering:
+  backend: pylenslib_direct
+  npix_hires: 800
+  source_n: 2.0
+  source_q: 0.9
+  source_pa: 0.5
+  include_lens_light: true
+  lens_light_n: 4.0
+  lens_light_re: 1.2
+  zoom_arcsec: 6.0
+  psf_fwhm: 0.5
+  readnoise: 6.0
+  gain: 1.5
+  observation:
+    zp: 27.0
+    texp: 300
+    mag_sky: 21.8
+    psf_fwhm: 0.5
