@@ -1,0 +1,50 @@
+output_dir: pylenslib_outputs_ggsl_galaxy
+n_realizations: 1
+n_pixels: 500
+grid_size: 0.02
+x_range: [-5, 5]
+y_range: [-5, 5]
+image_size: 100
+pixel_scale: 0.1
+clusters:
+  - name: GGSLGalaxyLens
+    M200: 1e15
+    c: 4.0
+    z: 0.5
+    n_subhalos: 0
+    subhalo_mass_range: [5e8, 5e10]
+    pylenslib_models:
+      fov_half_arcsec: 5.0
+      main:
+        profile: piemd
+        sigma0: 220.0
+        q: 0.82
+        pa: 0.4363323129985824
+        theta_c: 0.01
+        theta_t: 4.0
+        x1: 0.0
+        x2: 0.0
+sources:
+  n_sources: 1
+  region_size_arcmin: 0.1
+  redshift: 1.8
+  density_per_arcmin2: 50
+  explicit:
+    - x: 0.08
+      y: 0.02
+      magnitude: 23.3
+      radius_arcsec: 0.06
+seed: 42
+rendering:
+  backend: pylenslib_direct
+  npix_hires: 500
+  source_n: 2.0
+  source_q: 0.9
+  source_pa: 0.5
+  include_lens_light: true
+  lens_light_n: 4.0
+  lens_light_re: 1.5
+  observation:
+    zp: 23.9
+    texp: 2260
+    mag_sky: 22.5

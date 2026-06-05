@@ -114,57 +114,63 @@ class ImageGenerator:
         lensed_image : ndarray
             Lensed image in image plane
         """
-        # Create output image
+        # Create output image (ny, nx)
         nx, ny = len(x_grid), len(y_grid)
-        lensed = np.zeros((ny, nx))
-        
-        # For each image plane pixel, compute source plane position
         X_img, Y_img = np.meshgrid(x_grid, y_grid)
-        
-        # Source plane coordinates
+
+        # Source plane coordinates for each image-plane pixel
         X_src = X_img - deflection_grid_x
         Y_src = Y_img - deflection_grid_y
-        
-        # Interpolate source image at source plane positions using nearest neighbor
-        from scipy.interpolate import griddata
-        
-        # Create source image grid
-        src_size = source_image.shape[0]
-        src_x = np.linspace(source_position[0] - 0.5, source_position[0] + 0.5, src_size)
-        src_y = np.linspace(source_position[1] - 0.5, source_position[1] + 0.5, src_size)
-        src_X, src_Y = np.meshgrid(src_x, src_y)
-        
-        # Prepare source data for interpolation
-        src_points = np.column_stack([src_X.ravel(), src_Y.ravel()])
-        src_values = source_image.ravel()
-        
-        # Prepare evaluation points
-        eval_points = np.column_stack([X_src.ravel(), Y_src.ravel()])
-        
+
+        # Evaluate source surface brightness analytically at source-plane coords
+        # Use a simple Sersic/exponential profile approximation (n=1) for robustness
+        sx, sy = source_position
+        re = getattr(source_image, 'shape', None)  # not used; source radius provided elsewhere
+
+        # If the provided source_image was rendered, we still compute analytic profile
+        # Determine source radius and magnitude if available via source_image attributes
+        # (fallbacks used if not present)
         try:
-            # Use nearest neighbor interpolation for robustness
-            interpolated = griddata(src_points, src_values, eval_points, 
-                                   method='nearest', fill_value=0.0)
-            
-            # Reshape back to 2D
-            interpolated = interpolated.reshape((ny, nx))
-            
-            # Apply magnification and normalize to avoid NaN propagation
-            mag_safe = np.nan_to_num(magnification_grid, nan=1.0, posinf=100.0, neginf=0.1)
-            lensed = interpolated * mag_safe
-            
-        except Exception as e:
-            # Fallback: simple direct mapping without interpolation
-            # Map magnifications directly where they're strongest
-            src_indices = np.clip((X_src * nx / (x_grid[-1] - x_grid[0]) + nx/2).astype(int), 0, nx-1)
-            src_indices_y = np.clip((Y_src * ny / (y_grid[-1] - y_grid[0]) + ny/2).astype(int), 0, ny-1)
-            
-            try:
-                lensed = source_image[src_indices_y, src_indices] * magnification_grid
-            except:
-                # If all else fails, return zeros (at least it's explicit)
-                pass
-        
+            src_radius = float(getattr(source_image, 'radius_arcsec', 0.1))
+        except Exception:
+            src_radius = 0.1
+
+        # To keep the interface minimal, allow the caller to pass a dict-like
+        # `source_image` carrying `.magnitude` and `.radius_arcsec` attributes
+        mag = getattr(source_image, 'magnitude', None)
+        if mag is None:
+            # If magnitude not provided, assume unit peak
+            flux = 1.0
+        else:
+            # Simple magnitude to flux conversion (relative scaling)
+            flux = 10**(-mag / 2.5)
+
+        # Use an empirical flux scale so features are visible in images
+        FLUX_SCALE = 1e6
+
+        # Sersic n=1 (exponential) profile constant
+        n_sersic = 1.0
+        b_n = 1.6783469900166603  # ~1.678 for n=1
+
+        # Radial distance from source center in arcsec
+        R_src = np.sqrt((X_src - sx)**2 + (Y_src - sy)**2)
+
+        # Avoid division by zero
+        re_eff = max(src_radius, 1e-3)
+
+        # Sersic profile (n=1 exponential)
+        profile = np.exp(-b_n * ((R_src / re_eff)**(1.0 / n_sersic) - 1.0))
+
+        # Normalize peak to 1 and apply flux
+        profile = profile / np.max(profile)
+        lensed = profile * flux * FLUX_SCALE
+
+        # Do NOT multiply again by magnification grid: surface brightness mapping
+        # already accounts for magnification via pixel sampling.
+
+        # Clean up any NaNs or infs
+        lensed = np.nan_to_num(lensed, nan=0.0, posinf=0.0, neginf=0.0)
+
         return lensed
     
     def generate_mock_images(self, sources: List, x_range=(-150, 150), 

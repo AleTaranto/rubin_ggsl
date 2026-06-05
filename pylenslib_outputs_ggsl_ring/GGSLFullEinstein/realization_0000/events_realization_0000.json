@@ -1,0 +1,35 @@
+{
+  "events": [],
+  "summary": {
+    "cluster_cfg": {
+      "name": "GGSLFullEinstein",
+      "M200": "5e14",
+      "c": 4.0,
+      "z": 0.5,
+      "n_subhalos": 0,
+      "subhalo_mass_range": [
+        "5e8",
+        "5e10"
+      ],
+      "pylenslib_models": {
+        "fov_half_arcsec": 5.0,
+        "main": {
+          "profile": "piemd",
+          "sigma0": 300.0,
+          "q": 0.98,
+          "pa": 0.0,
+          "theta_c": 0.001,
+          "theta_t": 5.0,
+          "x1": 0.0,
+          "x2": 0.0
+        }
+      }
+    },
+    "n_sources": 1,
+    "n_events": 0,
+    "mean_magnification": 0,
+    "median_magnification": 0,
+    "mean_arc_length": 0,
+    "median_arc_length": 0
+  }
+}
