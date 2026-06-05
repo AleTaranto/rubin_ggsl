@@ -1,0 +1,63 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+eggs/
+*.egg-info/
+pip-wheel-metadata/
+*.egg
+
+# Virtual environment
+venv/
+env/
+.venv/
+ENV/
+
+# VSCode settings (user-specific)
+.vscode/
+
+# Pytest
+.pytest_cache/
+
+# Coverage
+.coverage
+htmlcov/
+
+# Type checkers
+.mypy_cache/
+.pyre/
+.pytype/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and temp
+*.log
+tmp/
+temp/
+
+# Generated outputs and example data
+outputs/
+cases/*/outputs/
+**/outputs/
+*.fits
+*.npz
+*.png
+
+# egg-info directories
+agent_sim.egg-info/
+
+# C/C++ compiled
+*.so
+*.dll
+
+# Other
+pip-log.txt

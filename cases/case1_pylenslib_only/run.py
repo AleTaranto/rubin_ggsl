@@ -176,16 +176,42 @@ def simulate_case(config: dict, case_index: int = None) -> dict:
 
 
 def save_results(results: dict, output_dir: Path) -> None:
-    """Save simulation results to files."""
+    """Save simulation results to files (NPZ, FITS, PNG)."""
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # Save combined image as NPZ
     image_path = output_dir / f"combined_image_{results['cluster_name']}.npz"
     np.savez(image_path, image=results['combined_image'])
     mpi_print(f"Saved image to {image_path}")
-    
-    # Save lensing maps
+
+    # Save combined image as FITS
+    try:
+        from astropy.io import fits
+        fits_path = output_dir / f"combined_image_{results['cluster_name']}.fits"
+        hdu = fits.PrimaryHDU(results['combined_image'].astype(np.float32))
+        hdu.writeto(fits_path, overwrite=True)
+        mpi_print(f"Saved FITS to {fits_path}")
+    except Exception as e:
+        mpi_print(f"Warning: unable to save FITS: {e}")
+
+    # Save combined image as PNG (normalized)
+    try:
+        import matplotlib.pyplot as plt
+        png_path = output_dir / f"combined_image_{results['cluster_name']}.png"
+        img = results['combined_image']
+        # Normalize for display
+        img = np.nan_to_num(img, nan=0.0, posinf=0.0, neginf=0.0)
+        vmax = np.max(img)
+        vmin = np.min(img)
+        if vmax <= vmin:
+            vmax = vmin + 1.0
+        plt.imsave(str(png_path), img, cmap='gray', vmin=vmin, vmax=vmax)
+        mpi_print(f"Saved PNG to {png_path}")
+    except Exception as e:
+        mpi_print(f"Warning: unable to save PNG: {e}")
+
+    # Save lensing maps as NPZ and FITS
     maps_path = output_dir / f"lensing_maps_{results['cluster_name']}.npz"
     np.savez(
         maps_path,
@@ -196,7 +222,17 @@ def save_results(results: dict, output_dir: Path) -> None:
         magnification=results['lensing_maps']['magnification']
     )
     mpi_print(f"Saved lensing maps to {maps_path}")
-    
+
+    try:
+        from astropy.io import fits
+        maps_fits_path = output_dir / f"lensing_maps_{results['cluster_name']}.fits"
+        # Save magnification only as primary HDU for quick inspection
+        hdu = fits.PrimaryHDU(results['lensing_maps']['magnification'].astype(np.float32))
+        hdu.writeto(maps_fits_path, overwrite=True)
+        mpi_print(f"Saved lensing maps FITS to {maps_fits_path}")
+    except Exception as e:
+        mpi_print(f"Warning: unable to save lensing maps FITS: {e}")
+
     # Save summary statistics
     summary_path = output_dir / f"summary_{results['cluster_name']}.json"
     summary = {
