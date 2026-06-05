@@ -1,0 +1,58 @@
+# Case 1 Example: Large Cluster Configuration
+# Represents a massive cluster like MACS J0416
+
+cluster:
+  name: LargeCluster
+  random_seed: 456
+  
+  main_halo:
+    M200: 2.0e15  # Solar masses
+    concentration: 4.5
+    redshift: 0.4
+  
+  subhalos:
+    - M200: 2.0e12
+      concentration: 4.0
+      redshift: 0.4
+      position: [60.0, 30.0]
+    
+    - M200: 1.5e12
+      concentration: 4.0
+      redshift: 0.4
+      position: [-45.0, 50.0]
+    
+    - M200: 8.0e11
+      concentration: 4.0
+      redshift: 0.4
+      position: [40.0, -60.0]
+    
+    - M200: 5.0e11
+      concentration: 4.0
+      redshift: 0.4
+      position: [-30.0, -40.0]
+
+simulation:
+  grid_size: 0.03
+  x_range: [-200, 200]
+  y_range: [-200, 200]
+  n_pixels: 200
+
+sources:
+  redshift: 1.5
+  n_sources: 50
+  random_seed: 456
+  density_per_arcmin2: 80
+  region_size: 8
+  magnitude_min: 17
+  magnitude_max: 25
+  radius_min: 0.03
+  radius_max: 0.5
+
+images:
+  size: 512
+  pixel_scale: 0.1
+
+output:
+  format: npz
+  save_lensing_maps: true
+  save_critical_lines: true

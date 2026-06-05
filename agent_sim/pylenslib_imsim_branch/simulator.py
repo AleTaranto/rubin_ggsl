@@ -13,6 +13,7 @@ Workflow:
 5. Detect and measure GGSL events
 """
 
+import numpy as np
 from agent_sim.core import models, lensing, observables, utils
 
 
@@ -234,8 +235,3 @@ class PyLenslibSimulator:
         )
         
         return lensed_images, combined
-
-
-# Import numpy for grid operations
-import numpy as np
-from agent_sim.core import models, lensing, observables, utils
