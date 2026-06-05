@@ -199,6 +199,9 @@ class ImageGenerator:
         alpha_x, alpha_y = self.deflection.compute_deflection_grid(x_grid, y_grid)
         mag_grid = self.magnification.compute_magnification_grid(x_grid, y_grid)
         
+        # Clean up magnification: handle NaN and inf values
+        mag_grid = np.nan_to_num(mag_grid, nan=1.0, posinf=100.0, neginf=0.1)
+        
         # Clamp magnification for stability
         mag_grid = np.clip(mag_grid, 0.1, 100)
         
@@ -214,6 +217,10 @@ class ImageGenerator:
                 pixel_scale=pixel_scale
             )
             
+            # Ensure source image is valid
+            src_img = np.nan_to_num(src_img, nan=0.0, posinf=1.0, neginf=0.0)
+            src_img = np.clip(src_img, 0, 1)
+            
             # Apply lensing
             lensed = self.lens_source(
                 src_img,
@@ -222,6 +229,9 @@ class ImageGenerator:
                 x_grid, y_grid,
                 mag_grid
             )
+            
+            # Clean up lensed image
+            lensed = np.nan_to_num(lensed, nan=0.0, posinf=0.0, neginf=0.0)
             
             # Scale by source brightness
             # Magnitude to flux: f ~ 10^(-m/2.5)
@@ -234,7 +244,7 @@ class ImageGenerator:
             total_flux = np.sum(lensed)
             
             # Ensure non-zero flux - if image is empty, use source brightness directly
-            if total_flux == 0:
+            if total_flux <= 0 or np.isnan(total_flux):
                 # Fallback: use a simple magnified source profile
                 lensed = src_img * flux * 10  # Scale up for visibility
                 n_images = 1
@@ -255,6 +265,10 @@ class ImageGenerator:
             
             # Add to combined image
             combined += lensed
+        
+        # Clean up final combined image
+        combined = np.nan_to_num(combined, nan=0.0, posinf=0.0, neginf=0.0)
+        combined = np.clip(combined, 0, None)
         
         return lensed_images, combined
     

@@ -6,7 +6,7 @@ cluster:
   random_seed: 123
   
   main_halo:
-    M200: 5.0e14  # Solar masses
+    M200: 5.0e14
     concentration: 3.5
     redshift: 0.3
   

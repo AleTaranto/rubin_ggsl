@@ -43,9 +43,9 @@ def build_cluster_from_config(config: dict) -> Cluster:
     
     # Create main halo
     main_halo = NFW(
-        M200=cluster_cfg['main_halo']['M200'],
-        c=cluster_cfg['main_halo']['concentration'],
-        redshift=cluster_cfg['main_halo']['redshift']
+        M200=float(cluster_cfg['main_halo']['M200']),
+        c=float(cluster_cfg['main_halo']['concentration']),
+        redshift=float(cluster_cfg['main_halo']['redshift'])
     )
     
     cluster = Cluster(main_halo, name=cluster_cfg.get('name', 'SimCluster'))
@@ -54,11 +54,11 @@ def build_cluster_from_config(config: dict) -> Cluster:
     np.random.seed(cluster_cfg.get('random_seed', 42))
     for subhalo_cfg in cluster_cfg.get('subhalos', []):
         subhalo = NFW(
-            M200=subhalo_cfg['M200'],
-            c=subhalo_cfg.get('concentration', 4.0),
-            redshift=subhalo_cfg.get('redshift', cluster_cfg['main_halo']['redshift'])
+            M200=float(subhalo_cfg['M200']),
+            c=float(subhalo_cfg.get('concentration', 4.0)),
+            redshift=float(subhalo_cfg.get('redshift', cluster_cfg['main_halo']['redshift']))
         )
-        position = tuple(subhalo_cfg['position'])
+        position = tuple(float(p) for p in subhalo_cfg['position'])
         cluster.add_subhalo(subhalo, position)
     
     return cluster
