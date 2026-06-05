@@ -24,23 +24,21 @@ import json
 from datetime import datetime
 import numpy as np
 from astropy.io import fits
+import yaml
+import matplotlib.pyplot as plt
 
-try:
-    from mpi4py import MPI
-    HAS_MPI = True
-    COMM = MPI.COMM_WORLD
-    RANK = COMM.Get_rank()
-    SIZE = COMM.Get_size()
-except ImportError:
-    HAS_MPI = False
-    RANK = 0
-    SIZE = 1
+from mpi_utils import get_mpi_info, mpi_print, mpi_barrier
+
+# MPI info
+MPI_INFO = get_mpi_info()
+HAS_MPI = MPI_INFO['has_mpi']
+RANK = MPI_INFO['rank']
+SIZE = MPI_INFO['size']
 
 
-def mpi_print(msg: str, rank: int = 0) -> None:
-    """Print only from specified rank."""
-    if RANK == rank:
-        print(msg)
+# local helper kept for compatibility
+def _mpi_print(msg: str, rank: int = 0) -> None:
+    mpi_print(msg, rank=rank)
 
 
 def get_default_clusters() -> List[str]:
@@ -105,7 +103,19 @@ def save_fits_with_metadata(image: np.ndarray, output_path: Path, cluster_name: 
     hdul.writeto(output_path, overwrite=True)
 
 
-def run_cluster_simulation(cluster_name: str, output_dir: Path, rank: int) -> Dict[str, Any]:
+def save_png(image: np.ndarray, output_path: Path, cmap: str = "viridis") -> None:
+    """Save an image array as PNG for quick inspection."""
+    output_path = output_path.with_suffix('.png')
+    plt.figure(figsize=(6, 6), dpi=150)
+    plt.imshow(image, origin='lower', cmap=cmap)
+    plt.axis('off')
+    plt.tight_layout()
+    plt.savefig(output_path, bbox_inches='tight', pad_inches=0)
+    plt.close()
+
+
+def run_cluster_simulation(cluster_name: str, output_dir: Path, rank: int,
+                           realization_id: int = None, seed: int = None) -> Dict[str, Any]:
     """Run single cluster simulation on this MPI rank.
     
     Returns metadata about the completed simulation.
@@ -123,6 +133,10 @@ def run_cluster_simulation(cluster_name: str, output_dir: Path, rank: int) -> Di
         
         mpi_print(f"[Rank {rank}] Starting: {cluster_name}", rank=rank)
         
+        # Optionally set a deterministic seed for reproducibility
+        if seed is not None:
+            np.random.seed(seed)
+
         pipeline = MeneghettiSimulationPipeline(cluster_name)
         results = pipeline.run()
         
@@ -130,27 +144,36 @@ def run_cluster_simulation(cluster_name: str, output_dir: Path, rank: int) -> Di
         
         if results:
             # Save results as FITS with metadata
+            # Save FITS and PNG for each image type
+            # Use realization-aware filenames when provided
+            suf = f"_real_{realization_id:04d}" if realization_id is not None else ""
+
             save_fits_with_metadata(
                 results['perfect_image'],
-                cluster_output / f"{cluster_name}_perfect.fits",
+                cluster_output / f"{cluster_name}_perfect{suf}.fits",
                 cluster_name,
                 "perfect",
                 "agent_sim_mpi_orchestrator.py"
             )
+            save_png(results['perfect_image'], cluster_output / f"{cluster_name}_perfect{suf}.png")
+
             save_fits_with_metadata(
                 results['hst_image'],
-                cluster_output / f"{cluster_name}_hst.fits",
+                cluster_output / f"{cluster_name}_hst{suf}.fits",
                 cluster_name,
                 "hst",
                 "agent_sim_mpi_orchestrator.py"
             )
+            save_png(results['hst_image'], cluster_output / f"{cluster_name}_hst{suf}.png")
+
             save_fits_with_metadata(
                 results['rubin_image'],
-                cluster_output / f"{cluster_name}_rubin.fits",
+                cluster_output / f"{cluster_name}_rubin{suf}.fits",
                 cluster_name,
                 "rubin",
                 "agent_sim_mpi_orchestrator.py"
             )
+            save_png(results['rubin_image'], cluster_output / f"{cluster_name}_rubin{suf}.png")
             
             mpi_print(
                 f"[Rank {rank}] ✓ Completed: {cluster_name} ({elapsed:.1f}s)",
@@ -186,11 +209,19 @@ def main():
     parser = argparse.ArgumentParser(
         description="MPI-parallel AGENT_sim orchestrator for Meneghetti simulations"
     )
+    parser.add_argument("--config", type=Path, default=None,
+                        help="Optional YAML config file describing clusters and options")
     parser.add_argument(
         "--clusters",
         nargs="+",
         default=get_default_clusters(),
         help="Cluster names to simulate"
+    )
+    parser.add_argument(
+        "--realizations",
+        type=int,
+        default=1,
+        help="Number of realizations per cluster (batch mode)"
     )
     parser.add_argument(
         "--output-dir",
@@ -209,20 +240,36 @@ def main():
         print(f"[MPI] Clusters to simulate: {args.clusters}")
         print()
 
-    # Distribute work
+    # If a config YAML is provided, override clusters/realizations
+    if args.config is not None and args.config.exists():
+        with args.config.open() as f:
+            cfg = yaml.safe_load(f)
+        if 'clusters' in cfg:
+            args.clusters = cfg['clusters']
+        if 'realizations' in cfg:
+            args.realizations = int(cfg['realizations'])
+
+    # Distribute work among MPI ranks
     my_clusters = distribute_clusters(args.clusters, RANK, SIZE)
-    
     mpi_print(f"[Rank {RANK}] Assigned {len(my_clusters)} clusters: {my_clusters}", rank=RANK)
 
-    # Run simulations
+    # Run simulations (supporting multiple realizations)
     local_results = []
     for cluster_name in my_clusters:
-        result = run_cluster_simulation(
-            cluster_name=cluster_name,
-            output_dir=args.output_dir,
-            rank=RANK
-        )
-        local_results.append(result)
+        for real in range(args.realizations):
+            # Create a per-realization seed to ensure different draws
+            seed = None
+            if args.realizations > 1:
+                seed = RANK * 100000 + real
+
+            result = run_cluster_simulation(
+                cluster_name=cluster_name,
+                output_dir=args.output_dir,
+                rank=RANK,
+                realization_id=real if args.realizations > 1 else None,
+                seed=seed
+            )
+            local_results.append(result)
 
     # Gather results on rank 0
     if HAS_MPI:

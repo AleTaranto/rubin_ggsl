@@ -210,10 +210,12 @@ class ImageGenerator:
         
         for source in sources:
             # Render source
+            # Render the source at the same resolution as the final image to
+            # avoid broadcasting / shape mismatch when mapping to the image grid.
             src_img = self.render_source(
-                source.source_position, 
+                source.source_position,
                 source.radius_arcsec,
-                image_size=128,
+                image_size=image_size,
                 pixel_scale=pixel_scale
             )
             
