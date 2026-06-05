@@ -1,0 +1,67 @@
+# Case 3: PyLensLib + ImSim GGSL Simulation Configuration
+#
+# This case combines:
+# - PyLensLib for lensing computations
+# - ImSim for realistic Rubin-like image generation
+# - Full pipeline: lensing -> mock images -> Rubinization
+
+cluster:
+  name: HybridCluster
+  random_seed: 42
+  
+  main_halo:
+    M200: 1.0e15
+    concentration: 4.0
+    redshift: 0.3
+  
+  subhalos:
+    - M200: 1.0e12
+      concentration: 4.0
+      redshift: 0.3
+      position: [50.0, 0.0]
+    
+    - M200: 5.0e11
+      concentration: 4.0
+      redshift: 0.3
+      position: [-30.0, 40.0]
+
+simulation:
+  grid_size: 0.05
+  x_range: [-150, 150]
+  y_range: [-150, 150]
+  n_pixels: 100
+
+sources:
+  redshift: 1.0
+  n_sources: 20
+  random_seed: 42
+  density_per_arcmin2: 50
+  region_size: 5
+  magnitude_min: 18
+  magnitude_max: 24
+  radius_min: 0.05
+  radius_max: 0.3
+
+# PyLensLib settings
+pylenslib:
+  use_for: [lensing_maps, critical_lines, deflection, magnification]
+
+# ImSim settings
+imsim:
+  use_for: [image_generation, psf_convolution, noise_addition]
+  psf_type: gaussian  # or rubin_realistic
+  psf_sigma: 0.7
+  read_noise_e: 10
+  sky_brightness_mag: 22
+  gain: 3.0
+
+images:
+  size: 256
+  pixel_scale: 0.2
+  apply_imsim: true
+
+output:
+  format: npz
+  save_perfect_images: true
+  save_imsim_images: true
+  save_lensing_maps: true
