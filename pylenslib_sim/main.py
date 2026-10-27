@@ -471,50 +471,6 @@ def direct_pylenslib_render(sim, sources_list, cfg: dict, cluster_cfg: dict, x_r
         noisy_c = None
     return [], combined_c, noisy_c, extent
 
-    # Apply PSF convolution if requested (psf_fwhm in arcsec)
-    psf_fwhm = float(render_cfg.get('psf_fwhm', obs_cfg.get('psf_fwhm', 0.0)))
-    pixel_scale_arcsec = sz / float(npix_hires)
-    if psf_fwhm and psf_fwhm > 0.0:
-        sigma_pix = psf_fwhm / (2.355 * pixel_scale_arcsec)
-        psf_img = ndimage.gaussian_filter(combined, sigma=sigma_pix)
-    else:
-        psf_img = combined.copy()
-
-    # Realistic detector noise: sky background, Poisson, and read noise + gain
-    mag_sky = float(obs_cfg.get('mag_sky', 22.5))
-    sky_counts_per_arcsec2 = ob.mag2counts(mag_sky)
-    pixel_area = pixel_scale_arcsec * pixel_scale_arcsec
-    sky_counts_per_pixel = sky_counts_per_arcsec2 * pixel_area
-
-    readnoise_e = float(obs_cfg.get('readnoise', render_cfg.get('readnoise', 6.0)))
-    gain = float(obs_cfg.get('gain', render_cfg.get('gain', 1.0)))
-    readnoise_adu = readnoise_e / gain if gain > 0 else readnoise_e
-
-    # Poisson noise on signal+sky (ensure non-negative)
-    lam = np.clip(psf_img + sky_counts_per_pixel, 0.0, None)
-    poisson = np.random.poisson(lam).astype(float)
-    gauss = np.random.normal(0.0, readnoise_adu, size=psf_img.shape)
-    noisy = poisson + gauss
-
-    # Optionally zoom (crop) around center in arcsec
-    zoom_arcsec = float(render_cfg.get('zoom_arcsec', render_cfg.get('crop_arcsec', 0.0)))
-    if zoom_arcsec and zoom_arcsec > 0.0:
-        half = zoom_arcsec / 2.0
-        # Compute pixel indices for crop
-        center = npix_hires // 2
-        half_pix = max(1, int((half / pixel_scale_arcsec)))
-        imin = max(0, center - half_pix)
-        imax = min(npix_hires, center + half_pix)
-        combined_c = combined[imin:imax, imin:imax]
-        noisy_c = noisy[imin:imax, imin:imax]
-        extent = (-half, half, -half, half)
-    else:
-        combined_c = combined
-        noisy_c = noisy
-        extent = (x_range[0], x_range[1], y_range[0], y_range[1])
-
-    return [], combined_c, noisy_c, extent
-
 
 def run_realization(cfg: dict, cluster_cfg: dict, realization_idx: int, outdir: Path):
     """Run one realization and return summary dict."""
