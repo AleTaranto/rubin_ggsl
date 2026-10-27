@@ -1,5 +1,8 @@
 import numpy as np
+import pytest
 from astropy.cosmology import Planck18 as cosmo
+
+pylenslib = pytest.importorskip("pyLensLib")
 from pyLensLib.compositeModel import compositeModel
 from pyLensLib.sie import sie
 from pyLensLib.nfwell import nfwell

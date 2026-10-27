@@ -44,6 +44,9 @@ Thumbs.db
 tmp/
 temp/
 
+# Self created tools output or scratch files
+self_created_tools/
+
 # Generated outputs and example data
 outputs/
 cases/*/outputs/

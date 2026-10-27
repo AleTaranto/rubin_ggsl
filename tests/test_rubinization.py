@@ -47,7 +47,7 @@ def test_imsim_rubinizer_basic():
     )
     
     assert rubinized.shape == perfect_image.shape, "Shape mismatch after Rubinization"
-    assert rubinized.dtype == np.ndarray, "Wrong output type"
+    assert isinstance(rubinized, np.ndarray), "Wrong output type"
     assert np.all(rubinized >= 0), "Negative values in Rubinized image"
     print("  ✓ Full Rubinization pipeline works")
     
@@ -117,7 +117,7 @@ def test_slsim_rubinizer_basic():
     )
     
     assert rubinized.shape == perfect_image.shape, "Shape mismatch"
-    assert rubinized.dtype == np.ndarray, "Wrong type"
+    assert isinstance(rubinized, np.ndarray), "Wrong type"
     assert np.all(rubinized >= 0), "Negative values"
     
     print("  ✓ SlsimRubinizer pipeline works")
@@ -167,8 +167,6 @@ def test_rubinization_with_real_lensing():
     print("\n[TEST] Rubinization with simulated lensing map...")
     
     # Simulate lensed source (Einstein ring-like)
-    from scipy.ndimage import gaussian_filter
-    
     x = np.linspace(-1, 1, 128)
     X, Y = np.meshgrid(x, x)
     r = np.sqrt(X**2 + Y**2)
